@@ -119,8 +119,26 @@ public class TreeTraversals
  /*------------------------------------------------------------------------------*/
  public static void allLeaves(int wordLength, int maxDigit)
  {
-            
+	 int[] aWord = new int[wordLength];
+	 for(int i = 0; i < wordLength; i++)
+		 aWord[i] = 1;
+	 
+     while(true)
+     {
+    	 System.out.println(Arrays.toString(aWord));
+    	 nextLeaf(aWord, wordLength, maxDigit);
+    	 if (checkFinished(aWord, wordLength))
+    		 return;
+     }
              
+ }
+ 
+ public static boolean checkFinished(int[] aWord, int wordLength)
+ {
+	 for(int i = 0; i < wordLength; i++)
+		 if (aWord[i] != 1)
+			 return false;
+	 return true;
  }
  
  /*---------------------------------------------------------------------------------*/
