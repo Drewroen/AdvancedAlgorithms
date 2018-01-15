@@ -149,7 +149,7 @@ public class TreeTraversals {
 				if (aWord[j] < maxDigit)
 				{
 					aWord[j] += 1;
-					return (level);
+					return j + 1;
 				}
 				else
 					aWord[j] = 0;
