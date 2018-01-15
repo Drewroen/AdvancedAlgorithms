@@ -139,23 +139,39 @@ public class TreeTraversals {
 	public static int nextVertex(int[] aWord, int level, int wordLength, int maxDigit) {
 		if (level < wordLength)
 		{
-			aWord[level + 1] = 1;
+			aWord[level] = 1;
 			return (level + 1);
 		}
 		else
 		{
-			for(int j = wordLength; j > 0; j--)
+			for(int j = wordLength - 1; j >= 0; j--)
+			{
 				if (aWord[j] < maxDigit)
 				{
-					aWord[j] = aWord[j] + 1;
+					aWord[j] += 1;
 					return (level);
 				}
+				else
+					aWord[j] = 0;
+			}
 		}
+		System.out.println("There are no more vertices. Resetting to the first vertice.");
 		return 0;
 	}
 	/*---------------------------------------------------------------------------------*/
 
 	public static int byPass(int[] aWord, int level, int wordLength, int maxDigit) {
-		return -1; // to be modified
+		for(int j = level - 1; j >= 0; j--)
+		{
+			if (aWord[j] < maxDigit)
+			{
+				aWord[j] += 1;
+				return j + 1;
+			}
+			else
+				aWord[j] = 0;
+		}
+		System.out.println("There are no more vertices. Resetting to the first vertice.");
+		return 0;
 	}
 }
