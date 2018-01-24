@@ -2,7 +2,7 @@ import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class DNAProfile {
+public class DNAProfileBruteForce {
 	
 	public static void main(String[] args) {
 		String[] dnaArray = { 
