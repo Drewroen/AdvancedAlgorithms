@@ -1,98 +1,137 @@
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
 
-public class DNAProfileGreedy {
+public class DNAProfileGreedy
+{
 	
-	public static void main(String[] args) {
-	/*
-		String[] dnaArray = { 
-				"gcggcagagcgcggcagcagaagctcggctcagcggctgggggtggccgctcgaatctgc",
-				"cagggcacctcgctccctcgcctctggcagcgggaccctgtgggcattgaaatccaactc",
-				"actcatgcttatttcctgtaatggacaaacttgatgctaatgtgagttctgaggagggtt",
-				"ggactgctttcctctggctcggctatatcaattccgggttgaacccttttctctacgcct",
-				"tcttgaataagtcttttagacgtgccttcctcatcatcctctgctgtgatgatgagcgct"};
-*/
-		String[] dnaArray = { 
-				"gcggcagagcgcggcagcagaagctcggctcagcggctgggggtggccgctcgaatctgc",
-				"actcatgcttatttcctgtaatggacaaacttgatgctaatgtgagttctgaggagggtt",
-				"cagggcacctcgctccctcgcctctggcagcgggaccctgtgggcattgaaatccaactc",
-				"ggactgctttcctctggctcggctatatcaattccgggttgaacccttttctctacgcct",
-				"tcttgaataagtcttttagacgtgccttcctcatcatcctctgctgtgatgatgagcgct"};
+	public static void main(String[] args)
+	{
 
-		int[] position = new int[] {1, 1};
-		int[] originalPosition = position.clone();
-		
+		String[] dnaArray = { 
+				"aatgcaagaatgaactccttcctggaataccccatacttagcagtggcga",
+				"tgctcagcccgagcctacccctcggaccataggattacaactttccagtc",
+				"agcgccaacagttgcggcggcgacgaccgcttcctagtgggcaggggggt",
+				"tcgccccaccaccaccaccaccaccaccatcgccacccccagccggctac",
+				"tccgggaacctgggggtgtcctactcccactcaagttgtggtccaagcta",
+				"aacttcagtgcgccttacagcccctacgcgttaaatcaggaagcagacga"};
+
 		Scanner in = new Scanner(System.in);
 		System.out.print("Enter the motif length: ");
 		int motifLength = in.nextInt();
+		
+		System.out.print("Enter the number of iterations: ");
+		int iterations = in.nextInt();
 		System.out.println();
 		
-		int bestScore = createScore(createProfile(dnaArray, position, motifLength));
-		int[] bestIndex = position.clone();
-		nextLeaf(position, position.length, dnaArray[0].length() - motifLength + 1);
-		while(!Arrays.equals(position, originalPosition))
+		Random rand = new Random();
+		int finalScore = 0;
+		int[] positions = new int[dnaArray.length];
+		int[][] finalProfile = new int[4][dnaArray.length];
+		int tempScore = 0;
+		String finalConsensus = "";
+		int a = 0;
+		int b = 0;
+		for(int i = 0; i < iterations; i++)
 		{
-			int currentScore = createScore(createProfile(dnaArray, position, motifLength));
-			if (currentScore > bestScore)
+			a = rand.nextInt(dnaArray.length);
+			b = rand.nextInt(dnaArray.length - 1);
+			if(a == b)
+				b = dnaArray.length - 1;
+			positions = new int[dnaArray.length];
+			seedProfile(dnaArray, motifLength, positions, a, b);
+			tempScore = processRest(dnaArray, motifLength, positions, a, b);
+			
+			if(tempScore > finalScore)
 			{
-				bestScore = currentScore;
-				bestIndex = position.clone();
+				finalProfile = createProfile(dnaArray, positions, motifLength);
+				finalScore = createScore(finalProfile);
 			}
-			nextLeaf(position, position.length, dnaArray[0].length() - motifLength + 1);
 		}
+		finalConsensus = createMotif(finalProfile);
 		
-		for(int i = 2; i < dnaArray.length; i++)
+		System.out.println("Consensus: " + finalConsensus);
+		System.out.println("Profile Index Vector: " + Arrays.toString(positions));
+		System.out.println();
+		System.out.println("Profile:");
+		System.out.println("A: " + Arrays.toString(finalProfile[0]));
+		System.out.println("C: " + Arrays.toString(finalProfile[1]));
+		System.out.println("G: " + Arrays.toString(finalProfile[2]));
+		System.out.println("T: " + Arrays.toString(finalProfile[3]));
+		System.out.println();
+		System.out.println("Best Score: " + finalScore);
+		
+	}
+		
+	public static void seedProfile(String[] dnaArray, int motifLength, int[] positions, int sample1, int sample2)
+	{
+		int bestScore = 0;
+		int[] tempPos = positions.clone();
+		for(int i = 1; i <= dnaArray[0].length() - motifLength + 1; i++)
 		{
-			position = bestIndex.clone();
-			int[] newPosition = new int[position.length + 1];
-			for(int j = 0; j < position.length; j++)
+			for(int j = 1; j <= dnaArray[0].length() - motifLength + 1; j++)
 			{
-				newPosition[j] = position[j];
-			}
-			position = newPosition.clone();
-			bestScore = 0;
-			for(int j = 1; j < dnaArray[0].length() - motifLength + 1; j++)
-			{
-				position[position.length - 1] = j;
-				int currentScore = createScore(createProfile(dnaArray, position, motifLength));
-				if (currentScore > bestScore)
+				tempPos[sample1] = i;
+				tempPos[sample2] = j;
+				int tempScore = createScore(createProfile(dnaArray, tempPos, motifLength));
+				if(tempScore > bestScore)
 				{
-					bestScore = currentScore;
-					bestIndex = position.clone();
+					positions[sample1] = i;
+					positions[sample2] = j;
+					bestScore = tempScore;
 				}
 			}
 		}
-		
-		String bestMotif = createMotif(createProfile(dnaArray, bestIndex, motifLength));
-		System.out.println("bestIndex vector: " + Arrays.toString(bestIndex));
-		System.out.println("bestScore: " + bestScore);
-		System.out.println();
-		System.out.println("Consensus found: " + bestMotif);
-		System.out.println();
-		for (int i = 0; i < bestIndex.length; i++)
-		{
-			System.out.println("String found in DNA line " + (i+1) + ": " + dnaArray[i].substring(bestIndex[i] - 1, bestIndex[i] + motifLength - 1));
+	}
+	
+	public static int processRest(String[] dnaArray, int motifLength, int[] positions, int sample1, int sample2)
+	{
+		int bestScore = 0;
+		for(int i = 0; i < dnaArray.length; i++)
+		{	
+			int[] tempPos = positions.clone();
+			if((i != sample1) && (i != sample2))
+			{
+				for(int j = 1; j <= dnaArray[0].length() - motifLength + 1; j++)
+				{
+					tempPos[i] = j;
+					int tempScore = createScore(createProfile(dnaArray, tempPos, motifLength));
+					if(tempScore > bestScore)
+					{
+						positions[i] = j;
+						bestScore = tempScore;
+					}
+				}
+			}
 		}
+		return bestScore;
 	}
 	
 	public static int[][] createProfile(String[] dnaArray, int[] positions, int motifLength)
 	{
 		String[] section = new String[dnaArray.length];
 		for(int i = 0; i < positions.length; i++)
-			section[i] = dnaArray[i].substring(positions[i] - 1, positions[i] - 1 + motifLength);
+		{
+			if(positions[i] != 0)
+				section[i] = dnaArray[i].substring(positions[i] - 1, positions[i] - 1 + motifLength);
+		}
+		
 		int[][] scoreTable = new int[4][motifLength];
 		for(int i = 0; i < motifLength; i++)
 			for(int j = 0; j < positions.length; j++)
 			{
-				if (section[j].substring(i, i+1).equalsIgnoreCase("A"))
-					scoreTable[0][i]++;
-				if (section[j].substring(i, i+1).equalsIgnoreCase("C"))
-					scoreTable[1][i]++;
-				if (section[j].substring(i, i+1).equalsIgnoreCase("G"))
-					scoreTable[2][i]++;
-				if (section[j].substring(i, i+1).equalsIgnoreCase("T"))
-					scoreTable[3][i]++;
+				if(positions[j] != 0)
+				{
+					if (section[j].substring(i, i+1).equalsIgnoreCase("A"))
+						scoreTable[0][i]++;
+					else if (section[j].substring(i, i+1).equalsIgnoreCase("C"))
+						scoreTable[1][i]++;
+					else if (section[j].substring(i, i+1).equalsIgnoreCase("G"))
+						scoreTable[2][i]++;
+					else if (section[j].substring(i, i+1).equalsIgnoreCase("T"))
+						scoreTable[3][i]++;
+				}
 			}
 		return scoreTable;
 	}
@@ -117,30 +156,18 @@ public class DNAProfileGreedy {
 	{
 		return Math.max(a, Math.max(b, Math.max(c, d)));
 	}
-
+	
 	public static char maxLetter(int a, int b, int c, int d)
 	{
 		if (max(a, b, c, d) == a)
-			return 'a';
+			return 'A';
 		else if (max(a, b, c, d) == b)
-			return 'c';
+			return 'C';
 		else if (max(a, b, c, d) == c)
-			return 'g';
+			return 'G';
 		else if (max(a, b, c, d) == d)
-			return 't';
+			return 'T';
 		else
 			return ' ';
-	}
-	
-	public static void nextLeaf(int[] aWord, int wordLength, int maxDigit)
-	{
-		boolean done = false;
-		for (int i = wordLength - 1; i >= 0 && !done; i--) {
-			if (aWord[i] < maxDigit) {
-				aWord[i] = aWord[i] + 1;
-				done = true;
-			} else
-				aWord[i] = 1;
-		}
 	}
 }
