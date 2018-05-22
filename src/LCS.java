@@ -91,10 +91,8 @@ public static void main(String[] args)
     			  backTable[i][j] = 1;
     	  }
 
- 
 // compute edit distance table
-// initialize first row and first column
-         
+// initialize first row and first column         
 
 // Start filling the edit distance table row by row  
         
@@ -108,7 +106,6 @@ public static void main(String[] args)
       }
  
  // Print back table    
- 
      System.out.println ("back table computed:");
       for(int i = 0; i < size1; i++)
       {
